@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Submission Records</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .user-branch { margin: 20px 0; }
+        .user-branch h2 { margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Submission Records</h1>
+    <div id="records"></div>
+
+    <script>
+        const owner = 'antpro0424';
+        const repo = 'submission-records';
+        const apiBaseUrl = `https://api.github.com/repos/${owner}/${repo}/branches`;
+
+        async function fetchBranches() {
+            try {
+                const response = await fetch(apiBaseUrl);
+                const branches = await response.json();
+                displayBranches(branches);
+            } catch (error) {
+                console.error('Error fetching branches:', error);
+            }
+        }
+
+        function displayBranches(branches) {
+            const recordsDiv = $('#records');
+            branches.forEach(branch => {
+                const branchName = branch.name;
+                if (branchName.includes('/')) {
+                    const [user, hw] = branchName.split('/');
+                    const userBranchDiv = $(`<div class="user-branch"><h2>${user}</h2><p>${hw}</p></div>`);
+                    recordsDiv.append(userBranchDiv);
+                }
+            });
+        }
+
+        fetchBranches();
+    </script>
+</body>
+</html>
