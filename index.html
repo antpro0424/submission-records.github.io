@@ -5,38 +5,78 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; }
-        .user-branch { margin: 20px 0; }
-        .user-branch h2 { margin-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #f2f2f2; }
+        .missing { background-color: #f8d7da; }
+        .submitted { background-color: #d4edda; }
     </style>
 </head>
 <body>
     <h1>Submission Records</h1>
-    <div id="records"></div>
+    <table id="records-table">
+        <thead>
+            <tr>
+                <th>User</th>
+                <!-- Homework headers will be inserted here dynamically -->
+            </tr>
+        </thead>
+        <tbody>
+            <!-- User rows will be inserted here dynamically -->
+        </tbody>
+    </table>
 
     <script>
-        const owner = 'antpro0424';
-        const repo = 'submission-records';
+        const owner = '<repository-owner>';
+        const repo = '<repository-name>';
         const apiBaseUrl = `https://api.github.com/repos/${owner}/${repo}/branches`;
 
         async function fetchBranches() {
             try {
                 const response = await fetch(apiBaseUrl);
                 const branches = await response.json();
-                displayBranches(branches);
+                processBranches(branches);
             } catch (error) {
                 console.error('Error fetching branches:', error);
             }
         }
 
-        function displayBranches(branches) {
-            const recordsDiv = $('#records');
+        function processBranches(branches) {
+            const users = {};
+            const homeworks = new Set();
+
             branches.forEach(branch => {
                 const branchName = branch.name;
                 if (branchName.includes('/')) {
                     const [user, hw] = branchName.split('/');
-                    const userBranchDiv = $(`<div class="user-branch"><h2>${user}</h2><p>${hw}</p></div>`);
-                    recordsDiv.append(userBranchDiv);
+                    if (!users[user]) {
+                        users[user] = {};
+                    }
+                    users[user][hw] = true;
+                    homeworks.add(hw);
                 }
+            });
+
+            displayTable(users, Array.from(homeworks).sort());
+        }
+
+        function displayTable(users, homeworks) {
+            const tableHead = $('#records-table thead tr');
+            const tableBody = $('#records-table tbody');
+
+            // Insert homework headers
+            homeworks.forEach(hw => {
+                tableHead.append(`<th>${hw}</th>`);
+            });
+
+            // Insert user rows
+            Object.keys(users).forEach(user => {
+                const row = $(`<tr><td>${user}</td></tr>`);
+                homeworks.forEach(hw => {
+                    const cellClass = users[user][hw] ? 'submitted' : 'missing';
+                    row.append(`<td class="${cellClass}">${users[user][hw] ? '✓' : '✗'}</td>`);
+                });
+                tableBody.append(row);
             });
         }
 
