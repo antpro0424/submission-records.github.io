@@ -30,15 +30,10 @@
         const owner = 'antpro0424';
         const repo = 'submission-records';
         const apiBaseUrl = `https://api.github.com/repos/${owner}/${repo}/branches`;
-        const token = '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';
 
         async function fetchBranches() {
             try {
-                const response = await fetch(apiBaseUrl, {
-                    headers: {
-                        'Authorization': `token ${token}`
-                    }
-                });
+                const response = await fetch(apiBaseUrl);
                 const branches = await response.json();
                 processBranches(branches);
             } catch (error) {
